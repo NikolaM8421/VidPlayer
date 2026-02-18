@@ -68,7 +68,7 @@ public abstract class VidPlayerCore {
     protected CoreConfig config;
     private readonly bool loadingFailure;
 
-    // For handyness
+    // For handiness
     internal VideoPlayer? videoPlayer => vidEntry?.videoPlayer;
     private float CurrScaleFactor => 6 * (CurrentLevel?.Zoom ?? 1);
     public bool Hires => config.hires;

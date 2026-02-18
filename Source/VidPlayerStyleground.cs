@@ -94,7 +94,7 @@ public sealed class VidPlayerStyleground : Backdrop {
             true /* always looping */,
             data.AttrBool("hires", false),
             data.AttrFloat("volumeMult", 1),
-            data.AttrFloat("globalAlpha"),
+            data.AttrFloat("globalAlpha", 1F),
             data.AttrBool("centered", false),
             chromaKey,
             data.AttrFloat("chromaKeyBaseThr"), 

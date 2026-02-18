@@ -43,7 +43,7 @@ public sealed class VidPlayerEntity : Entity {
             data.Bool("looping"),
             data.Bool("hires"),
             data.Float("volumeMult"),
-            data.Float("globalAlpha"),
+            data.Float("globalAlpha", 1F),
             data.Bool("centered"),
             data.Has("chromaKey") && !string.IsNullOrEmpty(data.Attr("chromaKey")) ? data.HexColor("chromaKey") : null,
             data.Float("chromaKeyBaseThr"),
