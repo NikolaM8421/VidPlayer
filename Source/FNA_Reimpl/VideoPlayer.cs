@@ -572,7 +572,7 @@ namespace Celeste.Mod.VidPlayer.FNA_Reimpl
 				int thisFrame = (int) (timer.Elapsed.TotalMilliseconds / (1000.0 / Video.fps));
 				if (thisFrame > currentFrame) {
 					// Only update the textures if we need to!
-					if (Theorafile.tf_readvideo(
+					if (TheorafileTarget.tf_readvideo(
 						    theora,
 						    yuvData,
 						    thisFrame - currentFrame
@@ -883,6 +883,7 @@ namespace Celeste.Mod.VidPlayer.FNA_Reimpl
 			}
 
 			currentFrame = -1;
+			secGPos = 0;
 		}
 
 		#endregion
