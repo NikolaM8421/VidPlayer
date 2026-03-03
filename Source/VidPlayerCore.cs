@@ -70,8 +70,9 @@ public abstract class VidPlayerCore {
 
     // For handiness
     internal VideoPlayer? videoPlayer => vidEntry?.videoPlayer;
-    private float CurrScaleFactor => 6 * (CurrentLevel?.Zoom ?? 1);
+    public float CurrScaleFactor => 6 * (CurrentLevel?.Zoom ?? 1);
     public bool Hires => config.hires;
+    public bool HasChromaKey => config.chromaKey != null;
     
     public bool Done => vidEntry == null || hasWoken && (videoPlayer?.State ?? (MediaState)(-1)) == MediaState.Stopped;
     public bool Muted {
@@ -175,12 +176,19 @@ public abstract class VidPlayerCore {
             return;
         }
         
-        
+        // TODO: Maybe move this to a PreRender so messing with the sb is not needed?
+        ChromaKeyPreRender(BlendState.AlphaBlend);
+        Draw.SpriteBatch.Draw(currTexture, dstRect, Color.White * config.globalAlpha);
+        ChromaKeyPostRender();
+    }
+
+    public void ChromaKeyPreRender(BlendState blend, bool needStop = true) {
         // Steal the current transformMatrix to pass it to the effect, this is needed for its vertex shader
         Matrix view = Draw.SpriteBatch.transformMatrix;
-        StopSpriteBatch();
+        if (needStop)
+            StopSpriteBatch();
         ChromaKeyShader.Parameters["key"].SetValue(new Vector4() {
-            X = config.chromaKey.Value.R/255f,
+            X = config.chromaKey!.Value.R/255f,
             Y = config.chromaKey.Value.G/255f,
             Z = config.chromaKey.Value.B/255f,
             W = 1f
@@ -194,10 +202,13 @@ public abstract class VidPlayerCore {
         Matrix projection = Matrix.CreateOrthographicOffCenter(0, width, height, 0, 0, 1);
 
         ChromaKeyShader.Parameters["view_projection"].SetValue(view * projection);
-        Draw.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, ChromaKeyShader);
-        Draw.SpriteBatch.Draw(currTexture, dstRect, Color.White * config.globalAlpha);
+        Draw.SpriteBatch.Begin(SpriteSortMode.Immediate, blend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, ChromaKeyShader);
+    }
+
+    public void ChromaKeyPostRender(bool needStart = true) {
         Draw.SpriteBatch.End(); // Technically useless but oh well
-        RestartSpriteBatch();
+        if (needStart)
+            RestartSpriteBatch();
     }
 
     public bool CanBeRevived() {
@@ -226,7 +237,7 @@ public abstract class VidPlayerCore {
         Init();
     }
 
-    protected virtual Vector2 GetEntitySize() {
+    internal virtual Vector2 GetEntitySize() {
         return config.fixedEntitySize;
     }
 
@@ -298,7 +309,7 @@ public abstract class VidPlayerCore {
         BackdropRenderer[] backdrops = [level.Background, level.Foreground];
         foreach (BackdropRenderer renderer in backdrops) {
             foreach (Backdrop backdrop in renderer.Backdrops) {
-                if (backdrop is VidPlayerStyleground styleground && styleground.Core != null) {
+                if (backdrop is IVidPlayerStyleground styleground && styleground.Core != null) {
                     yield return styleground.Core;
                 }
             }

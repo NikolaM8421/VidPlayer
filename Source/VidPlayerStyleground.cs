@@ -1,19 +1,16 @@
 using Celeste.Mod.Backdrops;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Mono.Cecil.Cil;
 using Monocle;
-using MonoMod;
-using MonoMod.Cil;
-using System;
 
 namespace Celeste.Mod.VidPlayer;
 
 [CustomBackdrop("VidPlayer/VidPlayerStyleground")]
-public sealed class VidPlayerStyleground : Backdrop {
+public sealed class VidPlayerStyleground : Backdrop, IVidPlayerStyleground {
     private VidPlayerCore? core;
     public VidPlayerCore? Core => core;
-    
+    bool IVidPlayerStyleground.Visible => base.Visible;
+
     private Scene? currentScene;
     private readonly BinaryPacker.Element data;
 
@@ -22,65 +19,6 @@ public sealed class VidPlayerStyleground : Backdrop {
         UseSpritebatch = false;
     }
 
-    internal static void ILLevelRender(ILContext il) {
-        ILCursor cursor = new(il);
-
-        // (after SetRenderTarget(null), Clear())
-        // Render BG hi-res stylegrounds
-        // (Right after End())
-        // Render FG hi-res stylegrounds
-        if (!cursor.TryGotoNext(MoveType.After, instr => instr.MatchLdnull(),
-                instr => instr.MatchCallvirt<GraphicsDevice>("SetRenderTarget")) ||
-                !cursor.TryGotoNext(MoveType.After, instr => instr.MatchCallvirt<GraphicsDevice>("Clear"))) {
-            throw new InvalidOperationException("Cannot find SetRenderTarget(null) and/or Clear()!");
-        }
-
-        // (after SetRenderTarget(null), Clear())
-        // Render BG hi-res stylegrounds
-        cursor.EmitLdarg0();
-        cursor.EmitLdcI4(0); // emit false
-        cursor.EmitDelegate(RenderHiresVPS);
-
-        if (!cursor.TryGotoNext(MoveType.After, instr => instr.MatchCallvirt<SpriteBatch>("End"))) {
-            throw new InvalidOperationException("Cannot find SpriteBatch.End()!");
-        }
-
-        // (Right after End())
-        // Render contents of said separate RenderTarget
-        cursor.EmitLdarg0();
-        cursor.EmitLdcI4(1); // emit true
-        cursor.EmitDelegate(RenderHiresVPS);
-    }
-
-    private static void RenderHiresVPS(Level level, bool fg) {
-        bool sbBegin = false;
-        foreach (Backdrop backdrop in fg ? level.Foreground.Backdrops : level.Background.Backdrops) {
-            if (backdrop is not VidPlayerStyleground vps || !(vps.core?.Hires ?? false)) continue;
-            // XXX: This is a workaround that Maddie's Helping Hand also does. GameplayBuffers.Level is
-            // cleared with BackgroundColor before drawing anything -- this means that background hires stylegrounds
-            // will be completely blocked by the default black color.
-            // A cleaner solution would probably be to replace the BackgroundColor in the original call to
-            // Color.Transparent, and then draw the black background later when GameplayBuffers.Level is
-            // rendered.
-            //
-            // The only drawback of this workaround (that I know of) is that, from the player/mapper's perspective,
-            // the black background of the level will now be unaffected by colorgrading/etc.
-            level.BackgroundColor = Color.Transparent;
-
-            if (!sbBegin) {
-                Draw.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, GameplayHudRenderer.GetMatrix());
-                sbBegin = true;
-            }
-
-            if (vps.Visible) {
-                vps.core?.Render();
-            }
-        }
-        if (sbBegin)
-            Draw.SpriteBatch.End();
-    }
-
-    
 
     private void Load() {
         core?.Mark();
@@ -133,6 +71,10 @@ public sealed class VidPlayerStyleground : Backdrop {
         }
     }
 
+    public void RenderHires(Scene scene) {
+        core?.Render();
+    }
+
     public override void Ended(Scene scene) {
         base.Ended(scene);
         core?.Mark();
@@ -152,7 +94,7 @@ public sealed class VidPlayerStyleground : Backdrop {
 
         protected override Level? CurrentLevel => owner.currentScene as Level;
 
-        protected override Vector2 GetEntitySize() {
+        internal override Vector2 GetEntitySize() {
             if (ExCamModImports.GetCameraDimensions == null || owner.currentScene == null)
                 return new Vector2(320, 180);
             return ExCamModImports.GetCameraDimensions.Invoke((Level)owner.currentScene);

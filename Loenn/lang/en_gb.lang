@@ -41,3 +41,20 @@ style.effects.VidPlayer/VidPlayerStyleground.description.chromaKeySpill=Color de
 style.effects.VidPlayer/VidPlayerStyleground.attribute.unpausable=Don't pause on pause
 style.effects.VidPlayer/VidPlayerStyleground.description.unpausable=Do not stop playback during the pause menu.
 
+style.effects.VidPlayer/VidPlayerParallax.name=In-Game Video Player (Parallax)
+style.effects.VidPlayer/VidPlayerParallax.description.video=The OGV video source to play, formated as "ModName:/absolute/path/to/file.ogv".
+style.effects.VidPlayer/VidPlayerParallax.description.muted=Whether the video's audio plays or not.
+style.effects.VidPlayer/VidPlayerParallax.description.keepAspectRatio=If true the video won't stretch to fit the given target dimensions.
+style.effects.VidPlayer/VidPlayerParallax.description.hires=When false the video will be downscaled to pixel-art form.
+style.effects.VidPlayer/VidPlayerParallax.description.volumeMult=Multiplier of the volume.
+style.effects.VidPlayer/VidPlayerParallax.description.centered=Centers the video when keepAspectRatio is true.
+style.effects.VidPlayer/VidPlayerParallax.description.chromaKey=Chroma Key color, leave empty to disable.
+style.effects.VidPlayer/VidPlayerParallax.attribute.chromaKeyBaseThr=Chroma Key Base Threshold
+style.effects.VidPlayer/VidPlayerParallax.description.chromaKeyBaseThr=Base threshold for Chroma Key, pixels below this threshold will be completely removed.
+style.effects.VidPlayer/VidPlayerParallax.attribute.chromaKeyAlphaCorr=Chroma Key Alpha Correction
+style.effects.VidPlayer/VidPlayerParallax.description.chromaKeyAlphaCorr=Alpha correction threshold, pixels below this threshold (starting from the Base threshold) will become proportionally transparent.
+style.effects.VidPlayer/VidPlayerParallax.attribute.chromaKeySpill=Chroma Key Spill
+style.effects.VidPlayer/VidPlayerParallax.description.chromaKeySpill=Color desaturation threshold, pixels below this threshold (starting from the Base threshold) will be proportionally desaturated.
+style.effects.VidPlayer/VidPlayerParallax.attribute.unpausable=Don't pause on pause
+style.effects.VidPlayer/VidPlayerParallax.description.unpausable=Do not stop playback during the pause menu.
+

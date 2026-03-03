@@ -49,10 +49,11 @@ public class VidPlayerModule : EverestModule {
         IL.Celeste.Level.Render += ILLevelRenderPatches;
         Everest.Events.LevelLoader.OnLoadingThread += AddGameplayHudToRendererList;
         IL.Celeste.GameplayRenderer.Render += GameplayHudRenderer.ILGameplayRenderer;
+        Everest.Events.Level.OnLoadBackdrop += VidPlayerParallax.OnLoadBackdrop;
     }
     
     private static void ILLevelRenderPatches(ILContext il) {
-        VidPlayerStyleground.ILLevelRender(il);
+        IVidPlayerStyleground.ILLevelRender(il);
         GameplayHudRenderer.ILLevelRender(il);
     }
 
